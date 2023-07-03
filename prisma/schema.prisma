@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model insurance_policy {
+  id                 String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  insurance_agent_id String?  @db.Uuid
+  policy_name        String   @db.VarChar(255)
+  policy_details     String   @db.VarChar(255)
+  created_at         DateTime @default(now()) @db.Timestamp(6)
+  updated_at         DateTime @default(now()) @db.Timestamp(6)
+  user               user?    @relation(fields: [insurance_agent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model medicine_inventory {
+  id                String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  pharmacy_staff_id String?  @db.Uuid
+  medicine_name     String   @db.VarChar(255)
+  medicine_details  String   @db.VarChar(255)
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
+  user              user?    @relation(fields: [pharmacy_staff_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model organization {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  description String?  @db.VarChar(255)
+  image       String?  @db.VarChar(255)
+  name        String   @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  user_id     String   @db.Uuid
+  tenant_id   String   @db.VarChar(255)
+  user        user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model patient_record {
+  id               String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  medical_staff_id String?  @db.Uuid
+  patient_name     String   @db.VarChar(255)
+  patient_details  String   @db.VarChar(255)
+  created_at       DateTime @default(now()) @db.Timestamp(6)
+  updated_at       DateTime @default(now()) @db.Timestamp(6)
+  user             user?    @relation(fields: [medical_staff_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email              String               @unique @db.VarChar(255)
+  firstName          String?              @db.VarChar(255)
+  lastName           String?              @db.VarChar(255)
+  roq_user_id        String               @db.VarChar(255)
+  tenant_id          String               @db.VarChar(255)
+  created_at         DateTime             @default(now()) @db.Timestamp(6)
+  updated_at         DateTime             @default(now()) @db.Timestamp(6)
+  insurance_policy   insurance_policy[]
+  medicine_inventory medicine_inventory[]
+  organization       organization[]
+  patient_record     patient_record[]
+}
